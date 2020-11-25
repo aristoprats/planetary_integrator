@@ -30,8 +30,8 @@ function main_code
         Earth.Velocity = Earth.Velocity + G*Sun.Mass/R^3*(u_vec/R);
         
         if mod(second, 24*60*60) == 0
-            transient_plot(:,second) = [second, Earth.Position]';
-            disp(day_ticker)
+            transient_plot(:,day_ticker + 1) = [second, Earth.Position]';
+            %disp(day_ticker)
             day_ticker = day_ticker + 1;
         end
     end
