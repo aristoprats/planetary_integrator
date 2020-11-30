@@ -6,6 +6,11 @@ function main_code
     % Constants
     G = 6.67408E-11; % m^3 kg^-1 s^-2
     
+    % Simulation Parameters
+    h_steps_per_day = 100;  
+    years_to_simulate = .25;
+    
+    %{
     %Data from Nasa
     % https://nssdc.gsfc.nasa.gov/planetary/factsheet/
     Mercury = Planet(.330E24, 4879 /2 *1000);
@@ -16,31 +21,35 @@ function main_code
     Sun     = Planet(1988500E24, 695700*1000, [0 0 0]);
     
     Planets_Array = [Mercury, Venus, Earth, Mars]
+    %}
+    % Earth Test Point
+        test_point = Planet(5.97E24, 6371E3, [1.496E11 0 0] , [0 2.5680E9 0]);
+    % Mercury test point
+        %test_point = Planet(3.285E23, 2439.7E3 , [58E6 0 0] , [0 4.0921E9 0]);
+    origin     = Planet(1988500E24  , 4   , [0  0 0],  [0 0    0]);
+    %test_point = Planet(5.97E24, 12756/2, [1.496E11, 0, 0], [0 29952 0]);
+    %origin     = Planet(1988500E24, 695700, [0 0 0]);
+    plot3(origin.Position(1),origin.Position(2), origin.Position(3),'o')
+    hold on
+    plot3(test_point.Position(1), test_point.Position(2), test_point.Position(3), 'x')
     
-    sim_time = 365*24*60*60;
-    transient_plot = zeros(4,sim_time/(24*60*60));
-    day_ticker = 0;
-    for second = 1:sim_time
-        
-        Earth.Position = Earth.Position + Earth.Velocity;
-        
-        u_vec = Sun.Position - Earth.Position;
-        R = norm(u_vec);
-        
-        Earth.Velocity = Earth.Velocity + G*Sun.Mass/R^3*(u_vec/R);
-        
-        if mod(second, 24*60*60) == 0
-            transient_plot(:,day_ticker + 1) = [second, Earth.Position]';
-            %disp(day_ticker)
-            day_ticker = day_ticker + 1;
+
+    days_to_span = years_to_simulate*365;
+    dt = 1 / h_steps_per_day;
+    total_time_span = days_to_span * h_steps_per_day;
+
+    for step = 1:total_time_span
+        if mod(step, round(total_time_span / 100)) == 0
+            % 2D plot for debug
+            %plot(test_point.Position(1), test_point.Position(2),'.');
+            plot3(test_point.Position(1), test_point.Position(2), test_point.Position(3),'k.');
+
+            drawnow
+            pause(.1);
         end
+        dv_dt = calcU(origin, test_point) * calcF(origin, test_point);
+        test_point.Velocity = test_point.Velocity + dv_dt * (dt);
+        test_point.Position = test_point.Position + test_point.Velocity*dt;
     end
-    
-    %transient_plot
-    
-    plot(transient_plot(2,:), transient_plot(3,:))
-    
-    
-    
-    
+    fprintf('############################# \nEnding Main_Run\n')
 end
